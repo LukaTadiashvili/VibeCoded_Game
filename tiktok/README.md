@@ -4,12 +4,12 @@ Every morning around **07:20 Tbilisi time**, GitHub Actions makes one 20-30 seco
 
 **What each video contains**
 - **Hook:** a yellow title box at the top plus a zoom hit and bass sound in the first second
-- **Real stock footage from Pexels:** a new shot every 1.5-2 seconds (12-15 shots per video), each with a different camera move (punch-in, push, pull, pan)
+- **Real stock footage from Pixabay** (or Pexels): a new shot every 1.5-2 seconds (12-15 shots per video), each with a different camera move (punch-in, push, pull, pan)
 - **Georgian voiceover** (Azure, alternating the Eka and Giorgi voices)
 - **Word-by-word pop-up captions** with the key words in yellow
 - **Whoosh sounds** on scene changes, plus optional music from `assets/music/`
 
-Everything here is free: GitHub Actions, the Pexels API, the Azure Speech free tier and the Telegram bot.
+Everything here is free: GitHub Actions, the Pixabay API, the Azure Speech free tier and the Telegram bot.
 
 ## Scripts
 `scripts/bank.json` holds ready-made Georgian scripts, written by Claude in chat. The job uses one per day and picks the topic with the fewest videos so far. When 5 or fewer are left, the bot warns you in Telegram. Then ask Claude: *"write 30 more scripts for the TikTok bank"*.
@@ -17,7 +17,7 @@ Everything here is free: GitHub Actions, the Pexels API, the Azure Speech free t
 Format of one script:
 ```json
 {"id": "S025", "niche": "facts", "hook_type": "shock", "title": "...", "hook_text": "on-screen hook",
- "scenes": [{"narration": "Georgian text, *key words* in asterisks", "shots": ["english pexels query", "another angle"]}],
+ "scenes": [{"narration": "Georgian text, *key words* in asterisks", "shots": ["english stock-video query", "another angle"]}],
  "caption": "...", "hashtags": ["#..."]}
 ```
 
@@ -35,7 +35,7 @@ Go to GitHub repo **Settings, then Secrets and variables, then Actions, then New
 |---|---|
 | `TELEGRAM_BOT_TOKEN` | In Telegram, message **@BotFather**, send `/newbot`, and copy the token |
 | `TELEGRAM_CHAT_ID` | Send "hi" to your new bot, then open `https://api.telegram.org/bot<TOKEN>/getUpdates` and copy the number in `"chat":{"id":...}` |
-| `PEXELS_API_KEY` | pexels.com/api, then sign up, then copy your key |
+| `PIXABAY_API_KEY` | Sign up at pixabay.com, then open pixabay.com/api/docs and copy the green key shown under **Parameters** next to `key` |
 | `AZURE_SPEECH_KEY` | portal.azure.com, then create a resource, then **Speech**, then pricing tier **Free F0**, then Keys and Endpoint, then Key 1 |
 
 Then add a **Variable** (the Variables tab, next to Secrets): `AZURE_SPEECH_REGION` = the region you picked for the Speech resource, such as `westeurope`.
@@ -55,4 +55,4 @@ pip install -r requirements.txt     # needs ffmpeg
 python generate.py --script S001 --no-send
 ```
 
-Footage: Pexels (free license). Font: Noto Sans and Noto Sans Georgian (SIL OFL, `assets/fonts/OFL.txt`).
+Footage: Pixabay / Pexels (free licenses). Optional `PEXELS_API_KEY` works too if you have one. Font: Noto Sans and Noto Sans Georgian (SIL OFL, `assets/fonts/OFL.txt`).

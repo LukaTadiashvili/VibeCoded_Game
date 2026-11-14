@@ -2,12 +2,12 @@
 
 Script (from scripts/bank.json, or Claude API if ANTHROPIC_API_KEY is set)
  -> Azure Georgian voice per scene
- -> real stock footage from Pexels: 2-3 fast cuts per scene, different angles
+ -> free stock footage (Pixabay or Pexels): 2-3 fast cuts per scene, different angles
  -> word-by-word pop-up captions, hook title, zoom punches, whoosh sounds
  -> 1080x1920 MP4 -> Telegram
 
 Every service is optional so the run never fully fails:
-  no PEXELS_API_KEY    -> animated gradient backgrounds
+  no PIXABAY_API_KEY / PEXELS_API_KEY -> animated gradient backgrounds
   no AZURE_SPEECH_KEY  -> silent video, captions timed to reading speed
   no TELEGRAM_*        -> video only saved to output/ (and the GitHub run)
 
@@ -128,6 +128,57 @@ def duration(path):
 
 # ------------------------------------------------------------------- footage
 
+def download(url, path):
+    if not path.exists():
+        with requests.get(url, stream=True, timeout=180) as d:
+            d.raise_for_status()
+            with open(path, "wb") as f:
+                for chunk in d.iter_content(1 << 20):
+                    f.write(chunk)
+    return path
+
+
+def pixabay_video(query, used, min_len):
+    key = os.getenv("PIXABAY_API_KEY")
+    if not key:
+        return None
+    r = requests.get("https://pixabay.com/api/videos/", timeout=30, params={
+        "key": key, "q": query[:100], "per_page": 30, "safesearch": "true", "order": "popular"})
+    r.raise_for_status()
+    hits = [h for h in r.json().get("hits", []) if h["id"] not in used and h.get("duration", 0) >= min_len]
+    top = hits[:8]
+    random.shuffle(top)
+    for h in top:
+        sizes = h.get("videos", {})
+        # Cropping a horizontal clip to 9:16 keeps only a narrow strip, so it must be ~4K to stay sharp.
+        # Pick the smallest version that is sharp after the crop, else the biggest one available.
+        options = [sizes[k] for k in ("medium", "large", "small") if sizes.get(k, {}).get("url")]
+
+        def sharp(v):
+            return v["width"] >= 1080 if v["height"] > v["width"] else v["height"] >= 1900
+        options.sort(key=lambda v: (not sharp(v), v["width"] * v["height"] * (1 if sharp(v) else -1)))
+        if not options:
+            continue
+        used.add(h["id"])
+        path = download(options[0]["url"], CACHE / f"pixabay_{h['id']}_{options[0]['height']}.mp4")
+        return path, float(h["duration"]), h.get("user", "")
+    return None
+
+
+def stock_video(query, used, min_len):
+    """Try every configured free footage source, simplest query last."""
+    for q in dict.fromkeys([query, " ".join(query.split()[-2:]), query.split()[-1]]):
+        for source in (pexels_video, pixabay_video):
+            try:
+                got = source(q, used, min_len)
+            except requests.RequestException as e:
+                log(f"{source.__name__} failed for '{q}': {e}")
+                got = None
+            if got:
+                return got
+    return None
+
+
 def pexels_video(query, used, min_len):
     key = os.getenv("PEXELS_API_KEY")
     if not key:
@@ -150,13 +201,7 @@ def pexels_video(query, used, min_len):
         if not files:
             continue
         used.add(v["id"])
-        path = CACHE / f"pexels_{v['id']}_{files[0]['height']}.mp4"
-        if not path.exists():
-            with requests.get(files[0]["link"], stream=True, timeout=120) as d:
-                d.raise_for_status()
-                with open(path, "wb") as f:
-                    for chunk in d.iter_content(1 << 20):
-                        f.write(chunk)
+        path = download(files[0]["link"], CACHE / f"pexels_{v['id']}_{files[0]['height']}.mp4")
         return path, v["duration"], v.get("user", {}).get("name", "")
     return None
 
@@ -389,9 +434,9 @@ def main():
             k += 1
             got = None
             try:
-                got = pexels_video(queries[j % len(queries)], used, length + 0.6)
+                got = stock_video(queries[j % len(queries)], used, length + 0.6)
             except requests.RequestException as e:
-                log(f"Pexels failed for '{queries[j % len(queries)]}': {e}")
+                log(f"Footage search failed for '{queries[j % len(queries)]}': {e}")
             if got:
                 path, src_len, author = got
                 make_shot(path, length, kind, out, src_len=src_len)
@@ -425,7 +470,7 @@ def main():
             f"ხმა: {voice.split('-')[2].replace('Neural', '')}\n"
             f"„{script['title']}“ · {total:.0f} წმ · {len(clips)} კადრი\n"
             + ("" if has_voice else "🔇 ხმის გარეშე (Azure გასაღები არ არის)\n")
-            + ("" if real else "🎨 Pexels გასაღები არ არის - კადრები გრადიენტია\n")
+            + ("" if real else "🎨 ვიდეო-კადრები ვერ მოიძებნა (Pixabay გასაღები?) - ფონები გრადიენტია\n")
             + f"📚 დარჩენილი სცენარები: {left}\n"
             + f"📊 2 დღეში ჩაწერე ნახვები data/results.csv-ში (ID: {vid})")
     sent = False if args.no_send else send_telegram(final, info, caption)
