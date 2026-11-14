@@ -1,50 +1,58 @@
-# Daily Georgian TikTok videos
+# Daily Georgian TikTok videos (free)
 
-Every morning at **~07:20 Tbilisi time**, GitHub Actions makes one vertical video (15-30 s, Georgian voice plus big Georgian captions) and sends it to your **Telegram** before 08:00. You post it in TikTok yourself (about 30 seconds).
+Every morning around **07:20 Tbilisi time**, GitHub Actions makes one 20-30 second vertical video and sends it to your **Telegram** before 08:00. You post it to TikTok yourself.
 
-```
-Claude writes the script -> Azure Georgian voice -> AI image per scene -> ffmpeg 1080x1920 MP4 -> Telegram
+**What each video contains**
+- **Hook:** a yellow title box at the top plus a zoom hit and bass sound in the first second
+- **Real stock footage from Pexels:** a new shot every 1.5-2 seconds (12-15 shots per video), each with a different camera move (punch-in, push, pull, pan)
+- **Georgian voiceover** (Azure, alternating the Eka and Giorgi voices)
+- **Word-by-word pop-up captions** with the key words in yellow
+- **Whoosh sounds** on scene changes, plus optional music from `assets/music/`
+
+Everything here is free: GitHub Actions, the Pexels API, the Azure Speech free tier and the Telegram bot.
+
+## Scripts
+`scripts/bank.json` holds ready-made Georgian scripts, written by Claude in chat. The job uses one per day and picks the topic with the fewest videos so far. When 5 or fewer are left, the bot warns you in Telegram. Then ask Claude: *"write 30 more scripts for the TikTok bank"*.
+
+Format of one script:
+```json
+{"id": "S025", "niche": "facts", "hook_type": "shock", "title": "...", "hook_text": "on-screen hook",
+ "scenes": [{"narration": "Georgian text, *key words* in asterisks", "shots": ["english pexels query", "another angle"]}],
+ "caption": "...", "hashtags": ["#..."]}
 ```
 
 ## Experiment: find what works
-Each day the pipeline tests a different **niche x visual style** combination. The least-tested combination goes first, and the voice alternates between Eka and Giorgi.
+Each video has an ID such as `V007`, shown in the Telegram message. About 48 hours after posting, add a line to `data/results.csv`:
+```
+V007,2026-11-20,1520,130,12,4,9      (id, date, views, likes, comments, shares, saves)
+```
+Then run `python analyze.py` to see averages by **topic**, **hook type** (shock, question, mistake, story) and **voice**. When a topic clearly wins, set the repo variable `LOCK_NICHE` (for example `facts`).
 
-| Niches | Styles |
-|---|---|
-| business, facts, georgia, psychology, money, motivation | photo (realistic AI images), illustration (3D cartoon), text (bold text on gradients) |
-
-That makes 18 combinations, so every one has been tried after about 3 weeks. To measure the results:
-1. Each video has an ID such as `V007`, shown in the Telegram message.
-2. About 48 hours after posting, add a line to `data/results.csv`:
-   `V007,2026-11-20,1520,130,12,4,9` (id, date, views, likes, comments, shares, saves)
-3. Run `python analyze.py` to see the averages per niche, style and voice.
-4. When there's a winner, set the repo variables `LOCK_NICHE` and/or `LOCK_STYLE` (Settings, then Secrets and variables, then Actions, then **Variables**). From then on every video uses that niche and style.
-
-## One-time setup
+## One-time setup (about 15 min)
 Go to GitHub repo **Settings, then Secrets and variables, then Actions, then New repository secret**:
 
-| Secret | Where to get it | Needed? |
-|---|---|---|
-| `TELEGRAM_BOT_TOKEN` | In Telegram, message **@BotFather**, send `/newbot`, and copy the token | yes |
-| `TELEGRAM_CHAT_ID` | Send any message to your new bot, then open `https://api.telegram.org/bot<TOKEN>/getUpdates` and copy `"chat":{"id": ...}` | yes |
-| `ANTHROPIC_API_KEY` | console.anthropic.com, then API keys | yes (otherwise the same demo video every day) |
-| `AZURE_SPEECH_KEY` | portal.azure.com, then create a **Speech** resource (free F0 tier), then Keys | recommended (without it the video has no voice) |
-| `OPENAI_API_KEY` | platform.openai.com, then API keys | optional (without it photo and illustration fall back to text style) |
+| Secret | How to get it (all free) |
+|---|---|
+| `TELEGRAM_BOT_TOKEN` | In Telegram, message **@BotFather**, send `/newbot`, and copy the token |
+| `TELEGRAM_CHAT_ID` | Send "hi" to your new bot, then open `https://api.telegram.org/bot<TOKEN>/getUpdates` and copy the number in `"chat":{"id":...}` |
+| `PEXELS_API_KEY` | pexels.com/api, then sign up, then copy your key |
+| `AZURE_SPEECH_KEY` | portal.azure.com, then create a resource, then **Speech**, then pricing tier **Free F0**, then Keys and Endpoint, then Key 1 |
 
-Variable (not secret): `AZURE_SPEECH_REGION`, the region of your Speech resource (default `westeurope`).
+Then add a **Variable** (the Variables tab, next to Secrets): `AZURE_SPEECH_REGION` = the region you picked for the Speech resource, such as `westeurope`.
 
-**Test it:** open the Actions tab, then **Daily TikTok video**, then **Run workflow**. A video arrives in Telegram within about 10 minutes.
+The workflow file must be on the repo's **default branch** for the daily schedule to run.
+
+**Test:** open the Actions tab, then **Daily TikTok video**, then **Run workflow**. A video arrives in Telegram within about 5-10 minutes.
 
 ## Tips when posting
-- Add a **trending sound** in TikTok at low volume. This usually gives a big reach boost.
+- In TikTok, add a **trending sound** at low volume. This gives a big reach boost.
 - Post at the same time every day. In Georgia, 12:00-14:00 or 19:00-22:00 usually work best.
 - Copy the caption from the last Telegram message.
 
 ## Run locally
 ```bash
-pip install -r requirements.txt   # needs ffmpeg installed
-python generate.py --niche facts --style text --no-send
+pip install -r requirements.txt     # needs ffmpeg
+python generate.py --script S001 --no-send
 ```
 
-Font: Noto Sans Georgian and Noto Sans (SIL Open Font License, `assets/fonts/OFL.txt`).
-Background music: put royalty-free `.mp3` files in `assets/music/` and they are mixed in quietly.
+Footage: Pexels (free license). Font: Noto Sans and Noto Sans Georgian (SIL OFL, `assets/fonts/OFL.txt`).

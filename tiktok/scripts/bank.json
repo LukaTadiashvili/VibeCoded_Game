@@ -1,0 +1,338 @@
+[
+  {
+    "id": "S001", "niche": "facts", "hook_type": "shock",
+    "title": "თაფლი არასდროს ფუჭდება",
+    "hook_text": "ეს საკვები 5000 წელს ძლებს",
+    "scenes": [
+      {"narration": "არსებობს საკვები, რომელიც *არასდროს* ფუჭდება.", "shots": ["honey dripping slow motion", "honey jar close up"]},
+      {"narration": "არქეოლოგებმა ეგვიპტურ სამარხებში *ათასობით წლის* თაფლი იპოვეს.", "shots": ["egypt pyramids", "desert ancient ruins"]},
+      {"narration": "და ის დღესაც *ჭამის ვარგისი* იყო.", "shots": ["honey spoon", "dipping bread in honey"]},
+      {"narration": "თაფლში ძალიან ცოტა წყალია, ამიტომ ბაქტერიები მასში *ვერ ცოცხლობენ*.", "shots": ["microscope laboratory", "bees honeycomb close up"]},
+      {"narration": "საქართველოში კი *მსოფლიოში უძველესი* თაფლის კვალი იპოვეს. შენ რომელი თაფლი გიყვარს? *დაწერე*!", "shots": ["beekeeper hives", "mountain village sunset"]}
+    ],
+    "caption": "ეს საკვები ათასობით წელს ძლებს და საქართველოსთანაც არის დაკავშირებული 🍯",
+    "hashtags": ["#ფაქტები", "#საქართველო", "#იცოდით", "#თაფლი", "#fyp"]
+  },
+  {
+    "id": "S002", "niche": "facts", "hook_type": "shock",
+    "title": "რვაფეხას სამი გული",
+    "hook_text": "3 გული და ცისფერი სისხლი",
+    "scenes": [
+      {"narration": "ამ ცხოველს *სამი გული* აქვს.", "shots": ["octopus underwater", "octopus close up"]},
+      {"narration": "მისი სისხლი წითელი კი არა, *ცისფერია*.", "shots": ["deep blue ocean", "underwater coral reef"]},
+      {"narration": "ნეირონების დაახლოებით ორი მესამედი კი ტვინში კი არა, *საცეცებშია*.", "shots": ["octopus tentacles", "octopus swimming"]},
+      {"narration": "ანუ თითოეულ საცეცს თითქმის *საკუთარი გონება* აქვს.", "shots": ["octopus camouflage", "scuba diver ocean"]},
+      {"narration": "იცოდი ეს? დაწერე კომენტარში, *რომელ ცხოველზე* მოგიყვე შემდეგ!", "shots": ["ocean waves aerial", "sea turtle swimming"]}
+    ],
+    "caption": "ეს ცხოველი სხვა პლანეტიდან მოსულს ჰგავს 🐙",
+    "hashtags": ["#ფაქტები", "#ცხოველები", "#იცოდით", "#ოკეანე", "#fyp"]
+  },
+  {
+    "id": "S003", "niche": "facts", "hook_type": "question",
+    "title": "ეიფელის კოშკი ზაფხულში იზრდება",
+    "hook_text": "რატომ იზრდება ეიფელის კოშკი?",
+    "scenes": [
+      {"narration": "იცი, რომ ეიფელის კოშკი ზაფხულში *15 სანტიმეტრით* მაღლდება?", "shots": ["eiffel tower", "paris aerial"]},
+      {"narration": "მიზეზი *სიცხეა*: მზეზე გახურებული რკინა ფართოვდება.", "shots": ["sun heat summer sky", "hot metal sparks"]},
+      {"narration": "ზამთარში კი ის ისევ *პატარავდება*.", "shots": ["paris winter", "eiffel tower night"]},
+      {"narration": "თან კოშკი თავიდან მხოლოდ *20 წლით* ააშენეს და დანგრევას უპირებდნენ.", "shots": ["construction crane", "old paris street"]},
+      {"narration": "ის *რადიოანტენამ* გადაარჩინა. კიდევ რა საიდუმლოს მოგიყვე? *დაწერე*!", "shots": ["radio antenna tower", "paris sunset"]}
+    ],
+    "caption": "ეიფელის კოშკი ყოველ ზაფხულს მაღლდება და ეს ფაქტი ცოტამ თუ იცის 🗼",
+    "hashtags": ["#ფაქტები", "#პარიზი", "#იცოდით", "#მოგზაურობა", "#fyp"]
+  },
+  {
+    "id": "S004", "niche": "facts", "hook_type": "mistake",
+    "title": "ბანანი კენკრაა",
+    "hook_text": "ბანანი კენკრაა, მარწყვი არა",
+    "scenes": [
+      {"narration": "მარწყვს კენკრას ეძახი? *შეცდები*.", "shots": ["strawberries close up", "strawberry field"]},
+      {"narration": "ბოტანიკის მიხედვით, ბანანი *კენკრაა*, მარწყვი კი *არა*.", "shots": ["bananas", "banana tree"]},
+      {"narration": "კენკრა ერთი ყვავილის ნაყოფია, რომელსაც თესლი *შიგნით* აქვს.", "shots": ["flower blooming", "fruit cut slow motion"]},
+      {"narration": "მარწყვს კი თესლი *გარეთ* აქვს.", "shots": ["strawberry macro", "strawberry falling in water"]},
+      {"narration": "ამ ლოგიკით, *საზამთროც* კენკრაა! შენ იცოდი? *დაწერე*!", "shots": ["watermelon slice", "summer fruit"]}
+    ],
+    "caption": "ბიოლოგიის მასწავლებელმა ეს არ გითხრა 🍓🍌",
+    "hashtags": ["#ფაქტები", "#იცოდით", "#ხილი", "#მეცნიერება", "#fyp"]
+  },
+  {
+    "id": "S005", "niche": "business", "hook_type": "mistake",
+    "title": "ფასის შემდეგ გაჩუმდი",
+    "hook_text": "ფასის თქმის შემდეგ გაჩუმდი",
+    "scenes": [
+      {"narration": "გაყიდვების უმეტესობა *ერთი შეცდომის* გამო იკარგება.", "shots": ["business meeting", "salesman talking to client"]},
+      {"narration": "ფასს ეუბნები კლიენტს და მაშინვე *ფასდაკლებას* სთავაზობ.", "shots": ["nervous man talking", "price tag"]},
+      {"narration": "ასე შენ თვითონ აჩვენებ, რომ შენს ფასს *არ ენდობი*.", "shots": ["businessman thinking", "doubtful face"]},
+      {"narration": "პროფესიონალები ფასს ამბობენ და *ჩუმდებიან*.", "shots": ["confident businesswoman", "office meeting silence"]},
+      {"narration": "ვინც პირველი ილაპარაკებს, ის *დათმობს*. სცადე და დაწერე, როგორ ჩაიარა!", "shots": ["handshake deal", "signing contract"]}
+    ],
+    "caption": "ეს ერთი წამი გადაწყვეტს, გაყიდი თუ არა 🤐",
+    "hashtags": ["#ბიზნესი", "#გაყიდვები", "#მეწარმე", "#ბიზნესრჩევები", "#fyp"]
+  },
+  {
+    "id": "S006", "niche": "business", "hook_type": "question",
+    "title": "რატომ ღირს ყველაფერი 9.99",
+    "hook_text": "რატომ ღირს ყველაფერი 9.99?",
+    "scenes": [
+      {"narration": "რატომ ღირს თითქმის ყველაფერი *ცხრა ოთხმოცდაცხრამეტი* და არა ათი?", "shots": ["supermarket shelves", "price tags store"]},
+      {"narration": "ჩვენი ტვინი ფასს *მარცხნიდან* კითხულობს.", "shots": ["eye close up", "woman reading"]},
+      {"narration": "პირველ ციფრს ვხედავთ და ფასი გვეჩვენება *უფრო იაფი*, ვიდრე სინამდვილეშია.", "shots": ["shopping cart", "woman shopping"]},
+      {"narration": "ამას *მარცხენა ციფრის ეფექტი* ჰქვია და მაღაზიები მას ყოველდღე იყენებენ.", "shots": ["cashier checkout", "shopping mall"]},
+      {"narration": "შენს ბიზნესში იყენებ ამ ხრიკს? *დაწერე* კომენტარში!", "shots": ["small business owner", "cafe owner smiling"]}
+    ],
+    "caption": "მაღაზიები ამ ხრიკს ყოველდღე იყენებენ შენზე 🧠",
+    "hashtags": ["#ბიზნესი", "#მარკეტინგი", "#ფსიქოლოგია", "#გაყიდვები", "#fyp"]
+  },
+  {
+    "id": "S007", "niche": "business", "hook_type": "story",
+    "title": "კოდაკის შეცდომა",
+    "hook_text": "თავად გამოიგონეს ის, რამაც გაანადგურა",
+    "scenes": [
+      {"narration": "1975 წელს კოდაკის ინჟინერმა *პირველი ციფრული კამერა* შექმნა.", "shots": ["vintage camera", "old film camera"]},
+      {"narration": "კომპანიას შეეშინდა, რომ ეს მათ *ფირის ბიზნესს* მოკლავდა.", "shots": ["film roll", "serious business meeting"]},
+      {"narration": "სხვა კომპანიებმა კი ციფრული ფოტო *ყველას* ხელში ჩაუდეს.", "shots": ["taking photo with smartphone", "people taking selfie"]},
+      {"narration": "2012 წელს კოდაკმა *გაკოტრება* გამოაცხადა.", "shots": ["empty office", "closed shop"]},
+      {"narration": "გაკვეთილი: თუ შენ არ შეცვლი შენს ბიზნესს, *სხვა შეცვლის*. გამოიწერე მეტი ისტორიისთვის!", "shots": ["entrepreneur laptop", "city business district"]}
+    ],
+    "caption": "მათ ხელში ჰქონდათ მომავალი და დამალეს 📸",
+    "hashtags": ["#ბიზნესი", "#ისტორია", "#მეწარმე", "#წარმატება", "#fyp"]
+  },
+  {
+    "id": "S008", "niche": "business", "hook_type": "mistake",
+    "title": "ხალხი შედეგს ყიდულობს",
+    "hook_text": "შენი პროდუქტი არავის აინტერესებს",
+    "scenes": [
+      {"narration": "ხალხს შენი პროდუქტი *არ აინტერესებს*.", "shots": ["bored customer", "scrolling phone"]},
+      {"narration": "ადამიანი ბურღს კი არ ყიდულობს, ის *კედელში ხვრელს* ყიდულობს.", "shots": ["power drill", "drilling wall"]},
+      {"narration": "ანუ ის ყიდულობს *შედეგს*: ჩამოკიდებულ სურათს, ლამაზ სახლს.", "shots": ["hanging picture frame", "cozy living room"]},
+      {"narration": "ამიტომ ნუ ჩამოთვლი ფუნქციებს. თქვი, *რა შეეცვლება* კლიენტს.", "shots": ["business presentation", "happy customer"]},
+      {"narration": "შენ რას ყიდი სინამდვილეში? *დაწერე* კომენტარში!", "shots": ["shop owner smiling", "small business"]}
+    ],
+    "caption": "გაყიდვების ყველაზე მნიშვნელოვანი წესი 🎯",
+    "hashtags": ["#ბიზნესი", "#გაყიდვები", "#მარკეტინგი", "#ბიზნესრჩევები", "#fyp"]
+  },
+  {
+    "id": "S009", "niche": "georgia", "hook_type": "shock",
+    "title": "დმანისის ადამიანები",
+    "hook_text": "პირველი ევროპელები საქართველოში ცხოვრობდნენ",
+    "scenes": [
+      {"narration": "აფრიკის გარეთ ერთ-ერთი *უძველესი ადამიანი* საქართველოში იპოვეს.", "shots": ["caucasus mountains aerial", "green valley mountains"]},
+      {"narration": "დმანისში აღმოჩენილი თავის ქალები *თითქმის 2 მილიონი* წლისაა.", "shots": ["human skull", "archaeology excavation"]},
+      {"narration": "ამ აღმოჩენამ მეცნიერებს *ადამიანის ისტორია* გადააწერინა.", "shots": ["scientist laboratory", "museum"]},
+      {"narration": "ჩვენი მიწა ერთ-ერთი *პირველი* იყო, სადაც ადამიანი აფრიკიდან მოვიდა.", "shots": ["ancient ruins hills", "hiking mountains"]},
+      {"narration": "იცოდი ეს? *გაუზიარე* მას, ვისაც ჯერ არ სმენია!", "shots": ["mountain sunset", "people looking at mountains"]}
+    ],
+    "caption": "საქართველო კაცობრიობის ისტორიის დასაწყისშია 🇬🇪",
+    "hashtags": ["#საქართველო", "#ისტორია", "#დმანისი", "#იცოდით", "#fyp"]
+  },
+  {
+    "id": "S010", "niche": "georgia", "hook_type": "shock",
+    "title": "8000 წლის ღვინო",
+    "hook_text": "8000 წლის ტრადიცია",
+    "scenes": [
+      {"narration": "მსოფლიოში ღვინის *უძველესი კვალი* საქართველოში იპოვეს.", "shots": ["pouring red wine", "vineyard"]},
+      {"narration": "თიხის ჭურჭლის ნატეხებში ღვინის ნარჩენი *8000 წლისაა*.", "shots": ["clay pottery", "archaeology"]},
+      {"narration": "ქვევრში ღვინის დაყენების ქართული მეთოდი *იუნესკოს* მემკვიდრეობის სიაშია.", "shots": ["vineyard aerial", "grape harvest"]},
+      {"narration": "ანუ ჩვენ ღვინოს *ათასობით წელია* ვაყენებთ.", "shots": ["wine cellar", "grapes close up"]},
+      {"narration": "შენ რომელი ქართული ღვინო გიყვარს *ყველაზე მეტად*? დაწერე!", "shots": ["friends toasting wine", "dinner table"]}
+    ],
+    "caption": "საქართველო ღვინის სამშობლოა და ეს მეცნიერულადაა დამტკიცებული 🍷",
+    "hashtags": ["#საქართველო", "#ღვინო", "#ქვევრი", "#ისტორია", "#fyp"]
+  },
+  {
+    "id": "S011", "niche": "georgia", "hook_type": "question",
+    "title": "მამა და დედა",
+    "hook_text": "რატომ იბნევიან უცხოელები?",
+    "scenes": [
+      {"narration": "მსოფლიოს ბევრ ენაში *მამა* დედას ნიშნავს.", "shots": ["mother hugging baby", "mother and child"]},
+      {"narration": "ქართულში კი მამა *მამაა*, დედა კი *დედა*.", "shots": ["father and son playing", "family in park"]},
+      {"narration": "უცხოელები ამაზე ხშირად *იბნევიან*.", "shots": ["confused tourist", "people laughing"]},
+      {"narration": "თან ქართულ დამწერლობას *სამი სახე* აქვს და სამივე იუნესკოს მემკვიდრეობაა.", "shots": ["old manuscript", "calligraphy writing"]},
+      {"narration": "შენ რომელი ქართული სიტყვა გიყვარს *ყველაზე მეტად*? დაწერე!", "shots": ["old town street", "tbilisi"]}
+    ],
+    "caption": "ქართული ენა ყველასგან განსხვავდება 🇬🇪",
+    "hashtags": ["#საქართველო", "#ქართულიენა", "#იცოდით", "#ფაქტები", "#fyp"]
+  },
+  {
+    "id": "S012", "niche": "georgia", "hook_type": "story",
+    "title": "თბილისი და ხოხობი",
+    "hook_text": "თბილისი ერთი ხოხბის გამო აშენდა",
+    "scenes": [
+      {"narration": "ლეგენდის თანახმად, თბილისი *ერთი ხოხბის* გამო აშენდა.", "shots": ["pheasant bird", "forest"]},
+      {"narration": "მეფე ვახტანგ გორგასალი ნადირობდა და მისმა *შევარდენმა* ხოხობი დაიჭირა.", "shots": ["falcon flying", "forest path"]},
+      {"narration": "ორივე *ცხელ წყაროში* ჩავარდა.", "shots": ["hot spring steam", "steaming water"]},
+      {"narration": "მეფემ აქ ქალაქის აშენება ბრძანა და *თბილი* წყლის გამო დაარქვა თბილისი.", "shots": ["tbilisi aerial", "old town rooftops"]},
+      {"narration": "დღესაც აბანოთუბანში *იმავე წყაროებით* ბანაობენ. ყოფილხარ? დაწერე!", "shots": ["bath house", "spa steam"]}
+    ],
+    "caption": "თბილისის დაარსების ლეგენდა, რომელიც ყველამ უნდა იცოდეს 🦅",
+    "hashtags": ["#თბილისი", "#საქართველო", "#ისტორია", "#ლეგენდა", "#fyp"]
+  },
+  {
+    "id": "S013", "niche": "psychology", "hook_type": "mistake",
+    "title": "ვარდისფერი სპილო",
+    "hook_text": "ნუ იფიქრებ ვარდისფერ სპილოზე",
+    "scenes": [
+      {"narration": "ახლა *ნუ იფიქრებ* ვარდისფერ სპილოზე.", "shots": ["elephant", "pink sky clouds"]},
+      {"narration": "უკვე იფიქრე, *ხომ*?", "shots": ["woman thinking", "surprised face"]},
+      {"narration": "როცა ტვინს რამეზე ფიქრს უკრძალავ, ის *უფრო ხშირად* უბრუნდება იმ ფიქრს.", "shots": ["stressed man", "sleepless night"]},
+      {"narration": "ამიტომ ნუ ეტყვი თავს: ნუ ნერვიულობ. თქვი, *რა გააკეთო* ამის ნაცვლად.", "shots": ["calm breathing", "meditation"]},
+      {"narration": "მომდევნო ვიდეოში კიდევ ერთ ტვინის ხრიკს გაჩვენებ. *გამოიწერე*!", "shots": ["person smiling at phone", "sunrise"]}
+    ],
+    "caption": "შენი ტვინი ამ ხრიკს ვერ უძლებს 🐘",
+    "hashtags": ["#ფსიქოლოგია", "#ტვინი", "#ფაქტები", "#თვითგანვითარება", "#fyp"]
+  },
+  {
+    "id": "S014", "niche": "psychology", "hook_type": "question",
+    "title": "ფრანკლინის ეფექტი",
+    "hook_text": "გინდა მოეწონო? სთხოვე დახმარება",
+    "scenes": [
+      {"narration": "გინდა ვინმეს *მოეწონო*? სთხოვე მას დახმარება.", "shots": ["friends talking coffee", "two people conversation"]},
+      {"narration": "ბენჯამინ ფრანკლინმა ასე თავისი *მოწინააღმდეგე* მეგობრად აქცია.", "shots": ["old library", "vintage books"]},
+      {"narration": "მან სთხოვა, *იშვიათი წიგნი* ეთხოვებინა.", "shots": ["old book close up", "giving a book"]},
+      {"narration": "ტვინი ფიქრობს: თუ მას ვეხმარები, ესე იგი *მომწონს*.", "shots": ["smiling man", "people helping each other"]},
+      {"narration": "ოღონდ *პატარა თხოვნით* დაიწყე. სცადე და დაწერე შედეგი!", "shots": ["friends laughing", "handshake"]}
+    ],
+    "caption": "ეს ფსიქოლოგიური ხრიკი 250 წელზე მეტია მუშაობს 🧠",
+    "hashtags": ["#ფსიქოლოგია", "#ურთიერთობები", "#ხრიკები", "#თვითგანვითარება", "#fyp"]
+  },
+  {
+    "id": "S015", "niche": "psychology", "hook_type": "shock",
+    "title": "უხილავი გორილა",
+    "hook_text": "ნახევარმა გორილა ვერ შეამჩნია",
+    "scenes": [
+      {"narration": "ექსპერიმენტში ადამიანებს *ბურთის პასების* დათვლა სთხოვეს.", "shots": ["basketball passing", "people playing basketball"]},
+      {"narration": "ამ დროს ეკრანზე *გორილას კოსტიუმში* გამოწყობილმა კაცმა გაიარა.", "shots": ["gorilla", "gorilla walking"]},
+      {"narration": "მაყურებლების თითქმის *ნახევარმა* ის ვერ შეამჩნია.", "shots": ["surprised woman", "eye close up"]},
+      {"narration": "როცა რამეზე ვართ კონცენტრირებული, ტვინი დანარჩენს *უბრალოდ შლის*.", "shots": ["crowd walking street", "focused man working"]},
+      {"narration": "ახლა დაფიქრდი: შენს ცხოვრებაში *რას ვერ ამჩნევ*? დაწერე!", "shots": ["man looking out window", "city night"]}
+    ],
+    "caption": "შენც ვერ შეამჩნევდი, დარწმუნებული ვარ 🦍",
+    "hashtags": ["#ფსიქოლოგია", "#ექსპერიმენტი", "#ტვინი", "#ფაქტები", "#fyp"]
+  },
+  {
+    "id": "S016", "niche": "psychology", "hook_type": "question",
+    "title": "წვეულების ეფექტი",
+    "hook_text": "ხმაურში რატომ გესმის შენი სახელი?",
+    "scenes": [
+      {"narration": "ხმაურიან წვეულებაზე *სხვების საუბარს* ვერ არჩევ.", "shots": ["party crowd", "noisy bar"]},
+      {"narration": "მაგრამ ვინმე შენს სახელს იტყვის და *მაშინვე* გესმის.", "shots": ["woman turning head", "surprised man"]},
+      {"narration": "ამას *წვეულების ეფექტი* ჰქვია: ტვინი ხმებს გამუდმებით ფილტრავს.", "shots": ["sound waves", "headphones music"]},
+      {"narration": "და შენი სახელი ამ ფილტრს *ყოველთვის* გადის.", "shots": ["friends talking", "people at party"]},
+      {"narration": "ამიტომ, თუ გინდა მოეწონო ვინმეს, *სახელით მიმართე*. გამოიწერე მეტი ხრიკისთვის!", "shots": ["business handshake", "smiling people"]}
+    ],
+    "caption": "შენი ტვინი ყოველთვის გისმენს, მაშინაც კი, როცა არ ფიქრობ 👂",
+    "hashtags": ["#ფსიქოლოგია", "#ტვინი", "#ურთიერთობები", "#ფაქტები", "#fyp"]
+  },
+  {
+    "id": "S017", "niche": "money", "hook_type": "shock",
+    "title": "10 წლის დაგვიანება",
+    "hook_text": "10 წლის დაგვიანება = ნახევარი ქონება",
+    "scenes": [
+      {"narration": "თვეში *200 ლარი*. ერთი შეხედვით, არაფერია.", "shots": ["counting money", "coins hands"]},
+      {"narration": "მაგრამ თუ 25 წლიდან დააბანდებ წლიური რვა პროცენტით, 65 წლისთვის *დაახლოებით 700 ათასი* დაგიგროვდება.", "shots": ["plant growing from coins", "stock market chart"]},
+      {"narration": "თუ 35 წლიდან დაიწყებ, *მხოლოდ 300 ათასი*.", "shots": ["clock ticking", "hourglass"]},
+      {"narration": "ათი წლის დაგვიანება *ნახევარზე მეტი* ჯდება. ამას რთული პროცენტი ჰქვია.", "shots": ["calculator", "financial chart"]},
+      {"narration": "ეს ფინანსური რჩევა არ არის, მაგრამ დაფიქრდი: *როდის დაიწყებ*? დაწერე!", "shots": ["young man thinking", "city sunrise"]}
+    ],
+    "caption": "დრო ფულზე ძვირია და აი, ციფრებით ⏳",
+    "hashtags": ["#ფინანსები", "#ინვესტიცია", "#ფული", "#დაზოგვა", "#fyp"]
+  },
+  {
+    "id": "S018", "niche": "money", "hook_type": "mistake",
+    "title": "პატარა ხარჯები",
+    "hook_text": "ყოველდღიური ყავა = 1800 ლარი",
+    "scenes": [
+      {"narration": "ყოველდღე *5 ლარიანი* ყავა. რა მოხდა მერე?", "shots": ["coffee to go", "barista making coffee"]},
+      {"narration": "წელიწადში ეს *1800 ლარზე მეტია*.", "shots": ["counting cash", "calendar"]},
+      {"narration": "დაამატე გამოწერები, რომლებსაც *აღარ იყენებ*, და საჭმლის მიტანა.", "shots": ["phone apps", "food delivery"]},
+      {"narration": "ფული დიდ ხარჯებზე კი არა, *პატარებზე* ქრება.", "shots": ["empty wallet", "worried woman"]},
+      {"narration": "ამ კვირაში ჩაიწერე ყველა ხარჯი. შედეგი *გაგაოცებს*. დაწერე, რაზე ხარჯავ ყველაზე მეტს!", "shots": ["writing in notebook", "planner desk"]}
+    ],
+    "caption": "შენი ფული აქ ქრება და ვერც კი ამჩნევ ☕",
+    "hashtags": ["#ფინანსები", "#ფული", "#დაზოგვა", "#რჩევები", "#fyp"]
+  },
+  {
+    "id": "S019", "niche": "money", "hook_type": "question",
+    "title": "ჯერ შენ თავს გადაუხადე",
+    "hook_text": "თვის ბოლოს არაფერი გრჩება?",
+    "scenes": [
+      {"narration": "ხელფასი აიღე და თვის ბოლოს *არაფერი* დაგრჩა?", "shots": ["empty wallet", "paying bills"]},
+      {"narration": "პრობლემა ისაა, რომ *ბოლოს* ზოგავ.", "shots": ["shopping bags", "credit card payment"]},
+      {"narration": "გააკეთე პირიქით: ხელფასის დღესვე *ათი პროცენტი* ცალკე გადადე.", "shots": ["piggy bank", "saving coins"]},
+      {"narration": "დანარჩენით იცხოვრე. ამას ჰქვია: *ჯერ შენ თავს გადაუხადე*.", "shots": ["happy woman laptop", "calm home"]},
+      {"narration": "წელიწადში *ერთ თვეზე მეტი* ხელფასი დაგიგროვდება. გამოიწერე მეტი რჩევისთვის!", "shots": ["money plant growing", "success celebration"]}
+    ],
+    "caption": "მარტივი წესი, რომელიც ფინანსებს შეგიცვლის 💰",
+    "hashtags": ["#ფინანსები", "#ფული", "#დაზოგვა", "#ხელფასი", "#fyp"]
+  },
+  {
+    "id": "S020", "niche": "money", "hook_type": "story",
+    "title": "ყველაზე ძვირი პიცა",
+    "hook_text": "ყველაზე ძვირი პიცა ისტორიაში",
+    "scenes": [
+      {"narration": "2010 წელს ერთმა პროგრამისტმა *ორი პიცა* იყიდა.", "shots": ["pizza box", "cheese pizza slice"]},
+      {"narration": "მან გადაიხადა *10 ათასი ბიტკოინი*.", "shots": ["bitcoin", "cryptocurrency"]},
+      {"narration": "მაშინ ეს დაახლოებით *40 დოლარი* იყო.", "shots": ["dollar bills", "cash money"]},
+      {"narration": "დღეს ამ ბიტკოინების ღირებულება *ასობით მილიონი დოლარია*.", "shots": ["stock market screen", "city skyline night"]},
+      {"narration": "22 მაისს ამ დღეს დღესაც *პიცის დღედ* იხსენებენ. შენ რას იზამდი? დაწერე!", "shots": ["friends eating pizza", "party"]}
+    ],
+    "caption": "2 პიცა, რომელიც ახლა ასობით მილიონი ღირს 🍕",
+    "hashtags": ["#ბიტკოინი", "#ფინანსები", "#კრიპტო", "#ისტორია", "#fyp"]
+  },
+  {
+    "id": "S021", "niche": "motivation", "hook_type": "story",
+    "title": "12 უარი",
+    "hook_text": "12-ჯერ უარი უთხრეს",
+    "scenes": [
+      {"narration": "ეს ქალი *12 გამომცემლობამ* უარით გაისტუმრა.", "shots": ["woman writing", "typewriter"]},
+      {"narration": "ის მარტოხელა დედა იყო და *ძალიან ღარიბად* ცხოვრობდა.", "shots": ["mother and child", "rainy window"]},
+      {"narration": "მეცამეტე გამომცემელმა კი წიგნი *ბოლოს და ბოლოს* მიიღო.", "shots": ["book printing", "stack of books"]},
+      {"narration": "ეს იყო *ჰარი პოტერი*, ისტორიაში ერთ-ერთი ყველაზე გაყიდვადი წიგნი.", "shots": ["castle", "magic book"]},
+      {"narration": "შენი უარი შეიძლება *მეთორმეტე* იყოს და არა ბოლო. მონიშნე ის, ვისაც ეს სჭირდება!", "shots": ["mountain sunrise", "person running"]}
+    ],
+    "caption": "როცა დანებება გინდა, გაიხსენე ეს ისტორია ✨",
+    "hashtags": ["#მოტივაცია", "#წარმატება", "#ისტორია", "#თვითგანვითარება", "#fyp"]
+  },
+  {
+    "id": "S022", "niche": "motivation", "hook_type": "mistake",
+    "title": "1 პროცენტი ყოველდღე",
+    "hook_text": "1% ყოველდღე = 37-ჯერ უკეთესი",
+    "scenes": [
+      {"narration": "დიდ ცვლილებას ელოდები? *შეცდომაა*.", "shots": ["person waiting", "bored man"]},
+      {"narration": "თუ ყოველდღე მხოლოდ *ერთი პროცენტით* გაუმჯობესდები...", "shots": ["morning run", "writing notes"]},
+      {"narration": "წლის ბოლოს *37-ჯერ* უკეთესი იქნები. ეს მათემატიკაა.", "shots": ["calculator", "growing chart"]},
+      {"narration": "თუ ყოველდღე ერთი პროცენტით გაუარესდები, თითქმის *ნულამდე* ჩამოხვალ.", "shots": ["tired man couch", "scrolling phone at night"]},
+      {"narration": "დღეს *რა პატარა ნაბიჯს* გადადგამ? დაწერე კომენტარში!", "shots": ["walking up stairs", "sunrise"]}
+    ],
+    "caption": "პატარა ნაბიჯები დიდ შედეგს იძლევა 📈",
+    "hashtags": ["#მოტივაცია", "#ჩვევები", "#თვითგანვითარება", "#წარმატება", "#fyp"]
+  },
+  {
+    "id": "S023", "niche": "motivation", "hook_type": "question",
+    "title": "2 წუთის წესი",
+    "hook_text": "გეზარება? სცადე 2 წუთი",
+    "scenes": [
+      {"narration": "რამის დაწყება *გეზარება*?", "shots": ["lazy man couch", "procrastination"]},
+      {"narration": "მიეცი თავს პირობა, რომ მხოლოდ *ორი წუთით* გააკეთებ.", "shots": ["timer", "clock"]},
+      {"narration": "ორი წუთი ვარჯიში, ორი წუთი კითხვა, *ორი წუთი* დალაგება.", "shots": ["push ups", "reading book"]},
+      {"narration": "ყველაზე რთული *დაწყებაა*. როცა დაიწყებ, ხშირად ვეღარ ჩერდები.", "shots": ["woman working on laptop", "running"]},
+      {"narration": "აბა, ახლავე სცადე და დაწერე, *რას დაიწყებ*!", "shots": ["sunrise", "man celebrating success"]}
+    ],
+    "caption": "ზარმაცობის მოსაგერიებელი ყველაზე მარტივი ხრიკი ⏱️",
+    "hashtags": ["#მოტივაცია", "#ჩვევები", "#პროდუქტიულობა", "#თვითგანვითარება", "#fyp"]
+  },
+  {
+    "id": "S024", "niche": "motivation", "hook_type": "shock",
+    "title": "62 წლის ასაკში",
+    "hook_text": "62 წლის ასაკში დაიწყო",
+    "scenes": [
+      {"narration": "ამ კაცმა თავისი ცნობილი ბიზნესი *62 წლის ასაკში* დაიწყო.", "shots": ["old man smiling", "senior man"]},
+      {"narration": "მანამდე ხშირად *იცვლიდა სამსახურს* და ბევრჯერ დამარცხდა.", "shots": ["man looking out window", "rainy day"]},
+      {"narration": "მას ჰქონდა *ქათმის რეცეპტი* და დაუღალავი ხასიათი.", "shots": ["fried chicken", "cooking kitchen"]},
+      {"narration": "ეს იყო *პოლკოვნიკი სანდერსი*, კეი-ეფ-სის დამფუძნებელი.", "shots": ["fast food restaurant", "city night"]},
+      {"narration": "ჯერ *გვიან არ არის*. მონიშნე ის, ვინც ფიქრობს, რომ დააგვიანა!", "shots": ["sunrise", "hiking"]}
+    ],
+    "caption": "არასდროს არის გვიანი, აი, დამტკიცება 🍗",
+    "hashtags": ["#მოტივაცია", "#წარმატება", "#ბიზნესი", "#ისტორია", "#fyp"]
+  }
+]

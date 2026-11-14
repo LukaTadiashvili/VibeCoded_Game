@@ -1,4 +1,4 @@
-"""Which niche / style / voice wins?  Usage: python analyze.py
+"""Which niche / hook type / voice wins?  Usage: python analyze.py
 
 Reads data/history.json (what was made) and data/results.csv (the numbers you
 copy from TikTok analytics ~48h after posting) and ranks by average views and
@@ -35,7 +35,7 @@ if not merged:
     raise SystemExit("No results yet - add rows to data/results.csv (id,date,views,likes,comments,shares,saves)")
 
 print(f"{len(merged)} videos with results\n")
-for dim in ("niche", "style", "voice"):
+for dim in ("niche", "hook_type", "voice"):
     groups = defaultdict(list)
     for m in merged:
         groups[m.get(dim) or "none"].append(m)
@@ -48,4 +48,4 @@ for dim in ("niche", "style", "voice"):
     print()
 
 best = max(merged, key=lambda m: m["views"])
-print(f"Top video: {best['id']} '{best['title']}' ({best['niche']}/{best['style']}) - {best['views']:.0f} views")
+print(f"Top video: {best['id']} '{best['title']}' ({best['niche']}/{best['hook_type']}) - {best['views']:.0f} views")

@@ -1,19 +1,20 @@
-"""Daily Georgian TikTok video generator.
+"""Daily Georgian TikTok video generator (free stack).
 
-Steps: pick experiment -> Claude writes script -> Azure voice per scene ->
-AI image per scene -> ffmpeg builds a 1080x1920 MP4 -> Telegram delivery.
+Script (from scripts/bank.json, or Claude API if ANTHROPIC_API_KEY is set)
+ -> Azure Georgian voice per scene
+ -> real stock footage from Pexels: 2-3 fast cuts per scene, different angles
+ -> word-by-word pop-up captions, hook title, zoom punches, whoosh sounds
+ -> 1080x1920 MP4 -> Telegram
 
-Every external service is optional so the pipeline never fully fails:
-  no ANTHROPIC_API_KEY  -> built-in demo script
-  no AZURE_SPEECH_KEY   -> silent video (add a trending sound in TikTok)
-  no OPENAI_API_KEY     -> gradient backgrounds instead of AI images
-  no TELEGRAM_*         -> video is only saved to output/ (and the GitHub run)
+Every service is optional so the run never fully fails:
+  no PEXELS_API_KEY    -> animated gradient backgrounds
+  no AZURE_SPEECH_KEY  -> silent video, captions timed to reading speed
+  no TELEGRAM_*        -> video only saved to output/ (and the GitHub run)
 
-Usage: python generate.py [--niche facts] [--style photo] [--no-send]
+Usage: python generate.py [--script S005] [--niche facts] [--no-send]
 """
 
 import argparse
-import base64
 import datetime as dt
 import json
 import os
@@ -21,178 +22,148 @@ import random
 import re
 import subprocess
 import sys
-import textwrap
 from pathlib import Path
 
 import requests
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
-
-import experiments as ex
+from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).parent
-FONT = str(ROOT / "assets/fonts/NotoSansGeorgian-ExtraBold.ttf")
+FONTS = ROOT / "assets/fonts"
+FONT_NAME = "TikTokGeo"
+BANK = ROOT / "scripts/bank.json"
 HISTORY = ROOT / "data/history.json"
 OUT = ROOT / "output"
+CACHE = OUT / "cache"
 W, H, FPS = 1080, 1920, 30
 TBILISI = dt.timezone(dt.timedelta(hours=4))
+VOICES = ["ka-GE-EkaNeural", "ka-GE-GiorgiNeural"]
 
 
 def log(msg):
     print(f"[{dt.datetime.now():%H:%M:%S}] {msg}", flush=True)
 
 
-# ---------------------------------------------------------------- experiment
-
-def pick_experiment(history, niche=None, style=None):
-    niche = niche or os.getenv("LOCK_NICHE") or ex.LOCK_NICHE
-    style = style or os.getenv("LOCK_STYLE") or ex.LOCK_STYLE
-    counts = {}
-    for h in history:
-        counts[(h["niche"], h["style"])] = counts.get((h["niche"], h["style"]), 0) + 1
-    styles = ex.STYLES if os.getenv("OPENAI_API_KEY") else ["text"]  # no image key -> text only
-    combos = [(n, s) for n in ex.NICHES for s in styles
-              if (not niche or n == niche) and (not style or s == style)]
-    if not combos:
-        sys.exit(f"Unknown niche/style: {niche}/{style}")
-    least = min(counts.get(c, 0) for c in combos)
-    n, s = random.choice([c for c in combos if counts.get(c, 0) == least])
-    # balance voices too
-    vcount = {v: sum(1 for h in history if h.get("voice") == v) for v in ex.VOICES}
-    voice = min(ex.VOICES, key=lambda v: (vcount[v], random.random()))
-    return n, s, voice
+def run(cmd, cwd=None):
+    subprocess.run([str(c) for c in cmd], check=True, cwd=cwd)
 
 
 # -------------------------------------------------------------------- script
 
-SYSTEM = """შენ ხარ ქართული TikTok-ის ვირუსული კონტენტის სცენარისტი.
-You write short vertical-video scripts in natural, modern, spoken Georgian (never sounds translated).
-
-Rules for a script that gets watched to the end:
-- Total voiceover 35-65 words, so the video is 15-30 seconds.
-- 5-7 scenes. Scene 1 is the HOOK: a shocking claim, question or "you're doing X wrong" in under 10 words that stops the scroll.
-- Every scene must add a new surprising detail; no filler, no greetings, no "ამ ვიდეოში".
-- Last scene: a punchy payoff plus a call to action that drives comments (a question to the viewer) or follows/saves.
-- on_screen: 2-6 word Georgian caption shown big on screen (the key words of that scene). No emoji.
-- image_prompt: English prompt for an image generator describing the scene visually; no text, letters or logos in the image; a concrete subject, not abstract.
-- Facts must be true and checkable. Do not invent statistics.
-- caption: TikTok caption in Georgian, max 120 characters, curiosity-driven.
-- hashtags: 4-6 hashtags mixing Georgian and broad ones (e.g. #საქართველო #fyp).
-"""
-
-SCHEMA = {
-    "type": "object",
-    "properties": {
-        "title": {"type": "string"},
-        "scenes": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "narration": {"type": "string"},
-                    "on_screen": {"type": "string"},
-                    "image_prompt": {"type": "string"},
-                },
-                "required": ["narration", "on_screen", "image_prompt"],
-                "additionalProperties": False,
-            },
-        },
-        "caption": {"type": "string"},
-        "hashtags": {"type": "array", "items": {"type": "string"}},
-    },
-    "required": ["title", "scenes", "caption", "hashtags"],
-    "additionalProperties": False,
-}
-
-DEMO_SCRIPT = {
-    "title": "თაფლი არასდროს ფუჭდება",
-    "scenes": [
-        {"narration": "იცოდი, რომ არსებობს საკვები, რომელიც არასდროს ფუჭდება?", "on_screen": "არასდროს ფუჭდება", "image_prompt": "a glowing jar of golden honey on a dark wooden table"},
-        {"narration": "ეგვიპტის პირამიდებში არქეოლოგებმა ათასობით წლის თაფლი იპოვეს.", "on_screen": "3000 წლის თაფლი", "image_prompt": "archaeologists discovering ancient clay jars inside an Egyptian tomb"},
-        {"narration": "და ის დღესაც ჭამის ვარგისი იყო!", "on_screen": "დღესაც ვარგისია!", "image_prompt": "a spoon dripping golden honey in warm light"},
-        {"narration": "საიდუმლო ისაა, რომ თაფლში თითქმის არ არის წყალი და ბაქტერიები ვერ ცოცხლობენ.", "on_screen": "ბაქტერიები ვერ ძლებენ", "image_prompt": "macro shot of honey texture with tiny air bubbles"},
-        {"narration": "ქართული თაფლი კი მსოფლიოში ერთ-ერთ უძველესად ითვლება. შენ რომელი თაფლი გიყვარს? დაწერე კომენტარში!", "on_screen": "შენ რომელი გიყვარს?", "image_prompt": "Georgian mountain village with beehives on a green slope at sunset"},
-    ],
-    "caption": "ეს საკვები 3000 წელიც კი ძლებს 🍯 გამოიცანი რომელი?",
-    "hashtags": ["#ფაქტები", "#საქართველო", "#თაფლი", "#fyp", "#იცოდით"],
-}
+def pick_script(history, script_id=None, niche=None):
+    """Next unused script; the niche with the fewest videos so far goes first."""
+    bank = json.loads(BANK.read_text())
+    if script_id:
+        return next(s for s in bank if s["id"] == script_id), bank
+    used = {h.get("script_id") for h in history}
+    niche = niche or os.getenv("LOCK_NICHE") or None
+    fresh = [s for s in bank if s["id"] not in used and (not niche or s["niche"] == niche)]
+    if not fresh:
+        return None, bank
+    count = {}
+    for h in history:
+        count[h["niche"]] = count.get(h["niche"], 0) + 1
+    low = min(count.get(s["niche"], 0) for s in fresh)
+    return random.choice([s for s in fresh if count.get(s["niche"], 0) == low]), bank
 
 
-def write_script(niche, style, history):
-    if not os.getenv("ANTHROPIC_API_KEY"):
-        log("No ANTHROPIC_API_KEY - using demo script")
-        return DEMO_SCRIPT
+def claude_script(niche, history):
+    """Optional: only used when ANTHROPIC_API_KEY is set and the bank is empty."""
     import anthropic
-
+    example = json.loads(BANK.read_text())[0]
     recent = [h["title"] for h in history[-60:]]
-    user = (
-        f"თემა/ნიშა: {ex.NICHES[niche]}\n"
-        f"Visual style of the video: {style}"
-        + (" (text-only video: on_screen captions carry the story, make them extra punchy)" if style == "text" else "")
-        + f"\nToday is {dt.date.today():%Y-%m-%d}.\n"
-        f"Do NOT repeat any of these previous topics: {json.dumps(recent, ensure_ascii=False)}\n"
-        "Write one new video script."
+    prompt = (
+        "Write one new Georgian TikTok script as JSON in exactly the same format as this example:\n"
+        f"{json.dumps(example, ensure_ascii=False)}\n\n"
+        f"niche: {niche}. Rules: natural spoken Georgian, 45-65 words total, 5 scenes, scene 1 is a scroll-stopping hook, "
+        "mark 1-2 key words per scene with *asterisks*, 'shots' are 2 short English Pexels stock-video search queries "
+        "for generic filmable things, true facts only, end with a question or call to action. Output only the JSON.\n"
+        f"Do not repeat: {json.dumps(recent, ensure_ascii=False)}"
     )
     client = anthropic.Anthropic()
     resp = client.beta.messages.create(
-        model="claude-opus-5-5",
-        max_tokens=16000,
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        output_config={"effort": "high", "format": {"type": "json_schema", "schema": SCHEMA}},
-        system=SYSTEM,
-        messages=[{"role": "user", "content": user}],
+        model="claude-opus-5-5", max_tokens=16000,
+        betas=["server-side-fallback-2026-07-01"], fallbacks="default",
+        output_config={"effort": "high"},
+        messages=[{"role": "user", "content": prompt}],
     )
     if resp.stop_reason == "refusal":
-        raise RuntimeError(f"Claude declined the script request: {resp.stop_details}")
+        raise RuntimeError("Claude declined the request")
     text = next(b.text for b in resp.content if b.type == "text")
-    return json.loads(text)
+    data = json.loads(text[text.find("{"): text.rfind("}") + 1])
+    data["id"] = f"C{len(history) + 1:03d}"
+    data["niche"] = niche
+    return data
 
 
 # --------------------------------------------------------------------- voice
 
+def clean(text):
+    return text.replace("*", "")
+
+
 def tts(text, voice, path):
-    key, region = os.getenv("AZURE_SPEECH_KEY"), os.getenv("AZURE_SPEECH_REGION", "westeurope")
+    key = os.getenv("AZURE_SPEECH_KEY")
     if not key:
         return False
-    ssml = (
-        "<speak version='1.0' xml:lang='ka-GE'>"
-        f"<voice name='{voice}'><prosody rate='+12%'>{escape_xml(text)}</prosody></voice></speak>"
-    )
+    region = os.getenv("AZURE_SPEECH_REGION") or "westeurope"
+    safe = clean(text).replace("&", "და").replace("<", "").replace(">", "")
+    ssml = (f"<speak version='1.0' xml:lang='ka-GE'><voice name='{voice}'>"
+            f"<prosody rate='+12%'>{safe}</prosody></voice></speak>")
     r = requests.post(
         f"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1",
-        headers={
-            "Ocp-Apim-Subscription-Key": key,
-            "Content-Type": "application/ssml+xml",
-            "X-Microsoft-OutputFormat": "audio-24khz-96kbitrate-mono-mp3",
-            "User-Agent": "tiktok-generator",
-        },
-        data=ssml.encode("utf-8"),
-        timeout=60,
-    )
+        headers={"Ocp-Apim-Subscription-Key": key, "Content-Type": "application/ssml+xml",
+                 "X-Microsoft-OutputFormat": "audio-24khz-96kbitrate-mono-mp3",
+                 "User-Agent": "tiktok-generator"},
+        data=ssml.encode("utf-8"), timeout=60)
     r.raise_for_status()
     path.write_bytes(r.content)
     return True
 
 
-def escape_xml(s):
-    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-
 def duration(path):
-    out = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
-        capture_output=True, text=True, check=True,
-    ).stdout
-    return float(out.strip())
+    out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                          "-of", "csv=p=0", str(path)], capture_output=True, text=True, check=True)
+    return float(out.stdout.strip())
 
 
-# -------------------------------------------------------------------- images
+# ------------------------------------------------------------------- footage
 
-PALETTES = [
-    ((255, 61, 104), (255, 179, 71)), ((58, 123, 213), (0, 210, 255)),
-    ((131, 58, 180), (253, 29, 29)), ((17, 153, 142), (56, 239, 125)),
-    ((252, 70, 107), (63, 94, 251)), ((15, 32, 39), (44, 83, 100)),
-]
+def pexels_video(query, used, min_len):
+    key = os.getenv("PEXELS_API_KEY")
+    if not key:
+        return None
+    for orientation in ("portrait", None):
+        params = {"query": query, "per_page": 15, "size": "medium"}
+        if orientation:
+            params["orientation"] = orientation
+        r = requests.get("https://api.pexels.com/videos/search", params=params,
+                         headers={"Authorization": key}, timeout=30)
+        r.raise_for_status()
+        vids = [v for v in r.json().get("videos", []) if v["id"] not in used and v["duration"] >= min_len]
+        if not vids:
+            continue
+        v = random.choice(vids[:6])
+        files = [f for f in v["video_files"]
+                 if f.get("height") and f.get("width") and f.get("file_type") == "video/mp4"]
+        # prefer portrait, then the size closest to 1920 px
+        files.sort(key=lambda f: (f["height"] < f["width"], abs(max(f["height"], f["width"]) - 1920)))
+        if not files:
+            continue
+        used.add(v["id"])
+        path = CACHE / f"pexels_{v['id']}_{files[0]['height']}.mp4"
+        if not path.exists():
+            with requests.get(files[0]["link"], stream=True, timeout=120) as d:
+                d.raise_for_status()
+                with open(path, "wb") as f:
+                    for chunk in d.iter_content(1 << 20):
+                        f.write(chunk)
+        return path, v["duration"], v.get("user", {}).get("name", "")
+    return None
+
+
+PALETTES = [((255, 61, 104), (255, 179, 71)), ((58, 123, 213), (0, 210, 255)),
+            ((131, 58, 180), (253, 29, 29)), ((17, 153, 142), (56, 239, 125)),
+            ((252, 70, 107), (63, 94, 251)), ((15, 32, 39), (44, 83, 100))]
 
 
 def gradient(path, seed):
@@ -203,138 +174,153 @@ def gradient(path, seed):
     small.resize((W, H), Image.BICUBIC).filter(ImageFilter.GaussianBlur(30)).save(path)
 
 
-def ai_image(prompt, style_desc, path):
-    key = os.getenv("OPENAI_API_KEY")
-    if not key or style_desc is None:
-        return False
-    r = requests.post(
-        "https://api.openai.com/v1/images/generations",
-        headers={"Authorization": f"Bearer {key}"},
-        json={
-            "model": os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1"),
-            "prompt": f"{prompt}. Style: {style_desc}. No text, no letters, no watermark.",
-            "size": "1024x1536",
-            "quality": os.getenv("OPENAI_IMAGE_QUALITY", "medium"),
-            "n": 1,
-        },
-        timeout=300,
-    )
-    r.raise_for_status()
-    path.write_bytes(base64.b64decode(r.json()["data"][0]["b64_json"]))
-    return True
+def motion(kind, frames):
+    """Camera-move presets so consecutive shots never feel the same."""
+    center = "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+    zp = f":d=1:s={W}x{H}:fps={FPS}"
+    if kind == "punch":   # fast zoom-out hit on every scene start
+        return f"zoompan=z='if(lt(on,9),1.28-0.031*on,1)':{center}{zp}"
+    if kind == "push":    # slow push-in
+        return f"zoompan=z='1+{0.12 / frames:.5f}*on':{center}{zp}"
+    if kind == "pull":    # slow pull-out
+        return f"zoompan=z='1.12-{0.12 / frames:.5f}*on':{center}{zp}"
+    if kind == "drift":   # sideways pan
+        return f"zoompan=z=1.12:x='(iw-iw/zoom)*on/{frames}':y='ih/2-(ih/zoom/2)'{zp}"
+    return "null"
+
+
+def make_shot(src, length, kind, out, is_image=False, src_len=0.0):
+    frames = max(1, int(round(length * FPS)))
+    cover = f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},setsar=1"
+    if is_image:
+        inp = ["-loop", "1", "-framerate", FPS, "-t", f"{length + 0.2:.3f}", "-i", src]
+        vf = f"{cover},{motion('push' if kind == 'static' else kind, frames)}"
+    else:  # random section of the stock clip, so reused clips look different
+        start = random.uniform(0.3, src_len - length - 0.3) if src_len > length + 0.6 else 0
+        inp = ["-ss", f"{start:.2f}", "-t", f"{length + 0.3:.3f}", "-i", src]
+        vf = f"fps={FPS},{cover},{motion(kind, frames)}"
+    run(["ffmpeg", "-y", "-loglevel", "error", *inp, "-vf", f"{vf},setsar=1,format=yuv420p",
+         "-frames:v", frames, "-r", FPS, "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", out])
 
 
 # ------------------------------------------------------------------ captions
 
-NOT_DRAWABLE = re.compile(r"[^\u0020-\u024F\u10A0-\u10FF\u1C90-\u1CBF\u2D00-\u2D2F\u2000-\u206F\u20BE]")
+def ass_time(t):
+    t = max(0.0, t)
+    return f"{int(t // 3600)}:{int(t % 3600 // 60):02d}:{t % 60:05.2f}"
 
 
-def caption_png(text, path, style, first):
-    """Big bold TikTok-style caption on a transparent 1080x1920 layer."""
-    text = " ".join(NOT_DRAWABLE.sub("", text).split())  # font has no emoji glyphs
-    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    size = 120 if style == "text" else (92 if first else 80)
-    max_w = W - 160
-    while True:
-        font = ImageFont.truetype(FONT, size)
-        lines = wrap(text, font, max_w, d)
-        if len(lines) <= (5 if style == "text" else 3) or size < 50:
-            break
-        size -= 6
-    lh = int(size * 1.3)
-    total = lh * len(lines)
-    # text style: centered; image styles: upper-middle, clear of TikTok UI at the bottom
-    top = (H - total) // 2 if style == "text" else int(H * 0.58)
-    color = (255, 230, 0) if first else (255, 255, 255)
-    if style != "text":
-        box = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        ImageDraw.Draw(box).rounded_rectangle(
-            (50, top - 30, W - 50, top + total + 20), radius=40, fill=(0, 0, 0, 130))
-        img = Image.alpha_composite(img, box)
-        d = ImageDraw.Draw(img)
-    for i, line in enumerate(lines):
-        w = d.textlength(line, font=font)
-        d.text(((W - w) / 2, top + i * lh), line, font=font, fill=color,
-               stroke_width=max(4, size // 14), stroke_fill=(0, 0, 0))
-    img.save(path)
-
-
-def wrap(text, font, max_w, d):
-    words, lines, cur = text.split(), [], ""
-    for w in words:
-        trial = (cur + " " + w).strip()
-        if d.textlength(trial, font=font) <= max_w or not cur:
-            cur = trial
-        else:
-            lines.append(cur)
-            cur = w
+def caption_groups(narration, start, length):
+    """Split narration into 1-3 word chunks timed proportionally to word length."""
+    tokens = []
+    for i, part in enumerate(narration.split("*")):
+        for w in part.split():
+            tokens.append((w, i % 2 == 1))
+    groups, cur = [], []
+    for w, emph in tokens:
+        cur.append((w, emph))
+        chars = sum(len(x[0]) for x in cur)
+        if len(cur) == 3 or chars > 14 or w[-1] in ".,!?:":
+            groups.append(cur)
+            cur = []
     if cur:
-        lines.append(cur)
-    return lines
+        groups.append(cur)
+    weights = [sum(len(w) + 2 for w, _ in g) for g in groups]
+    total, t, out = sum(weights), start, []
+    for g, wgt in zip(groups, weights):
+        d = length * wgt / total
+        out.append((t, t + d, g))
+        t += d
+    return out
 
 
-# --------------------------------------------------------------------- video
+def build_ass(script, timings, path):
+    head = f"""[Script Info]
+ScriptType: v4.00+
+PlayResX: {W}
+PlayResY: {H}
+WrapStyle: 0
 
-def scene_clip(i, bg, cap, audio, dur, out, style):
-    frames = int(dur * FPS)
-    zoom_in = i % 2 == 0
-    z = f"min(1+{0.15 / frames:.6f}*on,1.15)" if zoom_in else f"max(1.15-{0.15 / frames:.6f}*on,1)"
-    # cover-crop to 9:16 at 2x for smooth zoom, then Ken Burns zoom
-    vf = (
-        f"[0:v]scale={W * 2}:{H * 2}:force_original_aspect_ratio=increase,crop={W * 2}:{H * 2},"
-        f"zoompan=z='{z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={FPS}[bg];"
-        f"[1:v]format=rgba,fade=in:st=0:d=0.25:alpha=1[cap];"
-        f"[bg][cap]overlay=0:0:format=auto,format=yuv420p[v]"
-    )
-    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-i", str(bg), "-loop", "1", "-t", f"{dur:.3f}", "-i", str(cap)]
-    if audio:
-        cmd += ["-i", str(audio)]
-    else:
-        cmd += ["-f", "lavfi", "-t", f"{dur:.3f}", "-i", "anullsrc=r=24000:cl=mono"]
-    cmd += ["-filter_complex", vf, "-map", "[v]", "-map", "2:a", "-t", f"{dur:.3f}",
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-r", str(FPS),
-            "-c:a", "aac", "-ar", "44100", "-ac", "2", "-b:a", "128k", str(out)]
-    subprocess.run(cmd, check=True)
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Cap,{FONT_NAME},112,&H00FFFFFF,&H00FFFFFF,&H00000000,&H96000000,0,0,0,0,100,100,0,0,1,7,4,5,70,70,0,1
+Style: Hook,{FONT_NAME},88,&H00000000,&H00000000,&H0000E6FF,&H00000000,0,0,0,0,100,100,0,0,3,22,0,8,90,90,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+    lines = []
+    # Hook title on a yellow box at the top for the whole first scene
+    lines.append(f"Dialogue: 1,{ass_time(0)},{ass_time(timings[0][1])},Hook,,0,0,0,,"
+                 r"{\fscx60\fscy60\t(0,180,\fscx106\fscy106)\t(180,260,\fscx100\fscy100)}"
+                 + script["hook_text"])
+    pop = r"{\pos(540,1180)\fscx70\fscy70\t(0,90,\fscx108\fscy108)\t(90,150,\fscx100\fscy100)}"
+    for (st, en), sc in zip(timings, script["scenes"]):
+        for a, b, group in caption_groups(sc["narration"], st, en - st):
+            text = " ".join(r"{\c&H00E6FF&}" + w + r"{\c&HFFFFFF&}" if e else w for w, e in group)
+            lines.append(f"Dialogue: 0,{ass_time(a)},{ass_time(b)},Cap,,0,0,0,,{pop}{text}")
+    path.write_text(head + "\n".join(lines) + "\n", encoding="utf-8")
 
 
-def concat(clips, out, work):
-    lst = work / "list.txt"
-    lst.write_text("".join(f"file '{c.resolve()}'\n" for c in clips))
-    raw = work / "joined.mp4"
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst),
-                    "-c", "copy", str(raw)], check=True)
+# --------------------------------------------------------------------- sound
+
+def sfx(work):
+    whoosh, hit = work / "whoosh.wav", work / "hit.wav"
+    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i",
+         "anoisesrc=d=0.45:c=pink:a=0.6,highpass=f=500,lowpass=f=5000,"
+         "afade=t=in:d=0.2,afade=t=out:st=0.2:d=0.25,volume=0.45", "-ar", "44100", whoosh])
+    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i",
+         "sine=f=55:d=0.6,afade=t=out:st=0.03:d=0.55,volume=3", "-ar", "44100", hit])
+    return whoosh, hit
+
+
+def mix_audio(voice_parts, timings, total, work):
+    whoosh, hit = sfx(work)
+    args, filters, labels = [], [], []
+
+    def add(path, delay, label, extra=(), vol=None):
+        idx = len(labels)
+        args.extend([*extra, "-i", path])
+        f = f"[{idx}:a]aresample=44100,aformat=channel_layouts=stereo,adelay={int(delay * 1000)}:all=1"
+        filters.append(f + (f",volume={vol}" if vol else "") + f"[{label}]")
+        labels.append(f"[{label}]")
+
+    for i, (p, (st, _)) in enumerate(zip(voice_parts, timings)):
+        if p:
+            add(p, st, f"v{i}")
+    add(hit, 0, "hit")
+    for j, (st, _) in enumerate(timings[1:]):
+        add(whoosh, max(0.0, st - 0.2), f"w{j}")
     music = sorted((ROOT / "assets/music").glob("*.mp3"))
     if music:
-        track = random.choice(music)
-        log(f"Adding background music: {track.name}")
-        subprocess.run([
-            "ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-stream_loop", "-1", "-i", str(track),
-            "-filter_complex", "[1:a]volume=0.12[m];[0:a][m]amix=inputs=2:duration=first:normalize=0[a]",
-            "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k",
-            "-movflags", "+faststart", str(out)], check=True)
-    else:
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-c", "copy",
-                        "-movflags", "+faststart", str(out)], check=True)
+        add(random.choice(music), 0, "m", extra=("-stream_loop", "-1"), vol=0.10)
+    filters.append(f"{''.join(labels)}amix=inputs={len(labels)}:duration=longest:normalize=0,"
+                   f"apad,atrim=0:{total:.3f},alimiter=limit=0.95[out]")
+    out = work / "audio.m4a"
+    run(["ffmpeg", "-y", "-loglevel", "error", *args, "-filter_complex", ";".join(filters),
+         "-map", "[out]", "-c:a", "aac", "-b:a", "160k", out])
+    return out
 
 
 # ------------------------------------------------------------------ telegram
 
-def send_telegram(video, info_text, caption):
+def telegram(method, data, files=None):
     token, chat = os.getenv("TELEGRAM_BOT_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")
     if not (token and chat):
+        return False
+    r = requests.post(f"https://api.telegram.org/bot{token}/{method}",
+                      data={"chat_id": chat, **data}, files=files, timeout=300)
+    r.raise_for_status()
+    return True
+
+
+def send_telegram(video, info_text, caption):
+    if not telegram("sendMessage", {"text": info_text}):
         log("No Telegram credentials - skipping delivery")
         return False
-    base = f"https://api.telegram.org/bot{token}"
-    requests.post(f"{base}/sendMessage", data={"chat_id": chat, "text": info_text}, timeout=60).raise_for_status()
     with open(video, "rb") as f:
-        r = requests.post(f"{base}/sendVideo", data={
-            "chat_id": chat, "caption": caption[:1024], "supports_streaming": "true",
-            "width": W, "height": H,
-        }, files={"video": f}, timeout=300)
-    r.raise_for_status()
-    # caption again as plain message so it is one tap to copy
-    requests.post(f"{base}/sendMessage", data={"chat_id": chat, "text": caption}, timeout=60).raise_for_status()
+        telegram("sendVideo", {"supports_streaming": "true", "width": W, "height": H}, files={"video": f})
+    telegram("sendMessage", {"text": caption})  # separate message = one tap to copy
     return True
 
 
@@ -342,72 +328,114 @@ def send_telegram(video, info_text, caption):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--niche", choices=list(ex.NICHES))
-    ap.add_argument("--style", choices=list(ex.STYLES))
+    ap.add_argument("--script")
+    ap.add_argument("--niche")
     ap.add_argument("--no-send", action="store_true")
     args = ap.parse_args()
 
     history = json.loads(HISTORY.read_text())
-    niche, style, voice = pick_experiment(history, args.niche, args.style)
+    script, bank = pick_script(history, args.script, args.niche)
+    if script is None:
+        if os.getenv("ANTHROPIC_API_KEY"):
+            script = claude_script(args.niche or random.choice(sorted({s["niche"] for s in bank})), history)
+        else:
+            telegram("sendMessage", {"text": "⚠️ სცენარები დამთავრდა - დაამატე ახალი scripts/bank.json-ში"})
+            sys.exit("Script bank is empty - add new scripts to scripts/bank.json")
+    used_ids = {h.get("script_id") for h in history} | {script["id"]}
+    left = len([s for s in bank if s["id"] not in used_ids])
+
+    vcount = {v: sum(1 for h in history if h.get("voice") == v) for v in VOICES}
+    voice = min(VOICES, key=lambda v: (vcount[v], random.random()))
     vid = f"V{len(history) + 1:03d}"
     today = dt.datetime.now(TBILISI).date().isoformat()
-    log(f"{vid}: niche={niche} style={style} voice={voice}")
+    log(f"{vid}: {script['id']} '{script['title']}' niche={script['niche']} "
+        f"hook={script['hook_type']} voice={voice}")
 
     work = OUT / f"{today}_{vid}"
     work.mkdir(parents=True, exist_ok=True)
+    CACHE.mkdir(parents=True, exist_ok=True)
 
-    script = write_script(niche, style, history)
-    (work / "script.json").write_text(json.dumps(script, ensure_ascii=False, indent=2))
-    log(f"Script: {script['title']} ({len(script['scenes'])} scenes)")
-
-    clips, has_voice, has_images = [], False, False
+    # 1. voice per scene -> scene timings
+    voice_parts, timings, t, has_voice = [], [], 0.0, False
     for i, sc in enumerate(script["scenes"]):
-        audio = work / f"a{i}.mp3"
-        if tts(sc["narration"], voice, audio):
-            has_voice = True
-            dur = duration(audio) + 0.25
-        else:
-            audio = None
-            dur = max(2.2, min(4.5, len(sc["on_screen"]) * 0.18 + 1.5))
-        bg = work / f"bg{i}.png"
+        a = work / f"voice{i}.mp3"
         try:
-            got = ai_image(sc["image_prompt"], ex.STYLES[style], bg)
+            ok = tts(sc["narration"], voice, a)
         except requests.RequestException as e:
-            log(f"Image generation failed for scene {i}: {e} - using gradient")
-            got = False
-        if got:
-            has_images = True
+            log(f"TTS failed: {e}")
+            ok = False
+        if ok:
+            has_voice = True
+            d = duration(a) + 0.12
         else:
-            gradient(bg, i + len(history))
-        cap = work / f"cap{i}.png"
-        caption_png(sc["on_screen"], cap, style if got or style == "text" else "text", i == 0)
-        clip = work / f"clip{i}.mp4"
-        scene_clip(i, bg, cap, audio, dur, clip, style)
-        clips.append(clip)
-        log(f"  scene {i + 1}: {dur:.1f}s  {sc['on_screen']}")
+            a = None
+            d = max(2.0, len(clean(sc["narration"]).split()) * 0.42 + 0.4)
+        voice_parts.append(a)
+        timings.append((t, t + d))
+        t += d
+    total = t + 0.4
 
-    final = OUT / f"{today}_{vid}.mp4"
-    concat(clips, final, work)
-    total = duration(final)
-    log(f"Video ready: {final} ({total:.1f}s)")
+    # 2. footage: each scene is cut into up to 3 shots with different camera moves
+    used, clips, credits, real = set(), [], set(), 0
+    moves, k = ["push", "drift", "pull", "static"], 0
+    for i, ((st, en), sc) in enumerate(zip(timings, script["scenes"])):
+        end = total if i == len(timings) - 1 else en
+        queries = sc["shots"]
+        n = max(1, min(3, int((end - st) // 1.2)))
+        length = (end - st) / n
+        for j in range(n):
+            out = work / f"shot{i}_{j}.mp4"
+            kind = "punch" if j == 0 else moves[k % len(moves)]
+            k += 1
+            got = None
+            try:
+                got = pexels_video(queries[j % len(queries)], used, length + 0.6)
+            except requests.RequestException as e:
+                log(f"Pexels failed for '{queries[j % len(queries)]}': {e}")
+            if got:
+                path, src_len, author = got
+                make_shot(path, length, kind, out, src_len=src_len)
+                credits.add(author)
+                real += 1
+            else:
+                bg = work / f"bg{i}_{j}.png"
+                gradient(bg, i * 3 + j + len(history))
+                make_shot(bg, length, kind, out, is_image=True)
+            clips.append(out)
+        log(f"  scene {i + 1}: {end - st:.1f}s, {n} shots")
 
-    tags = " ".join(script["hashtags"])
-    caption = f"{script['caption']}\n\n{tags}"
-    info = (
-        f"🎬 {vid} | {today}\n"
-        f"თემა: {niche} | სტილი: {style} | ხმა: {voice.split('-')[2].replace('Neural', '')}\n"
-        f"სათაური: {script['title']}\n"
-        f"ხანგრძლივობა: {total:.0f} წმ"
-        + ("" if has_voice else "\n🔇 ხმის გარეშე - დაამატე ტრენდული მუსიკა TikTok-ში")
-        + "\n\n📊 24 საათის შემდეგ ჩაწერე ნახვები data/results.csv-ში (ID: " + vid + ")"
-    )
+    # 3. join shots, burn captions, add voice + sound effects
+    (work / "list.txt").write_text("".join(f"file '{c.name}'\n" for c in clips))
+    run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", "list.txt",
+         "-c", "copy", "joined.mp4"], cwd=work)
+    build_ass(script, timings, work / "captions.ass")
+    mix_audio(voice_parts, timings, total, work)
+    final = (OUT / f"{today}_{vid}.mp4").resolve()
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", "joined.mp4", "-i", "audio.m4a",
+         "-vf", f"subtitles=captions.ass:fontsdir={FONTS.resolve()}",
+         "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-preset", "medium", "-crf", "19",
+         "-pix_fmt", "yuv420p", "-c:a", "copy", "-t", f"{total:.3f}", "-movflags", "+faststart",
+         final], cwd=work)
+    log(f"Video ready: {final} ({total:.1f}s, {len(clips)} shots, {real} with real footage)")
+
+    # 4. deliver
+    caption = f"{script['caption']}\n\n{' '.join(script['hashtags'])}"
+    info = (f"🎬 {vid} | {today}\n"
+            f"თემა: {script['niche']} | ჰუკი: {script['hook_type']} | "
+            f"ხმა: {voice.split('-')[2].replace('Neural', '')}\n"
+            f"„{script['title']}“ · {total:.0f} წმ · {len(clips)} კადრი\n"
+            + ("" if has_voice else "🔇 ხმის გარეშე (Azure გასაღები არ არის)\n")
+            + ("" if real else "🎨 Pexels გასაღები არ არის - კადრები გრადიენტია\n")
+            + f"📚 დარჩენილი სცენარები: {left}\n"
+            + f"📊 2 დღეში ჩაწერე ნახვები data/results.csv-ში (ID: {vid})")
     sent = False if args.no_send else send_telegram(final, info, caption)
+    if left <= 5:
+        telegram("sendMessage", {"text": f"⚠️ მხოლოდ {left} სცენარი დარჩა - სთხოვე Claude-ს ახლების დაწერა"})
 
-    history.append({
-        "id": vid, "date": today, "niche": niche, "style": style if has_images or style == "text" else "text", "voice": voice if has_voice else None,
-        "title": script["title"], "caption": script["caption"], "hashtags": script["hashtags"],
-        "ai_images": has_images, "seconds": round(total, 1), "sent": sent,
-    })
+    history.append({"id": vid, "date": today, "script_id": script["id"], "niche": script["niche"],
+                    "hook_type": script["hook_type"], "voice": voice if has_voice else None,
+                    "title": script["title"], "seconds": round(total, 1), "shots": len(clips),
+                    "real_footage": real, "credits": sorted(c for c in credits if c), "sent": sent})
     HISTORY.write_text(json.dumps(history, ensure_ascii=False, indent=2) + "\n")
     log("Done")
 
