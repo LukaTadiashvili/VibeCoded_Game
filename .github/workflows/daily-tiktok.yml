@@ -1,0 +1,75 @@
+name: Daily TikTok video
+
+on:
+  schedule:
+    # 03:17 UTC = 07:17 Tbilisi (UTC+4). Generation takes ~5-10 min, so the
+    # video is in Telegram before 08:00. GitHub can delay scheduled runs a bit.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      niche:
+        description: "Force a niche (business, facts, georgia, psychology, money, motivation) - empty = auto"
+        required: false
+      style:
+        description: "Force a style (photo, illustration, text) - empty = auto"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-tiktok
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: tiktok
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+          pip install -r requirements.txt
+
+      - name: Generate and send video
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ vars.AZURE_SPEECH_REGION || 'westeurope' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          LOCK_NICHE: ${{ vars.LOCK_NICHE }}
+          LOCK_STYLE: ${{ vars.LOCK_STYLE }}
+          IN_NICHE: ${{ inputs.niche }}
+          IN_STYLE: ${{ inputs.style }}
+        run: |
+          ARGS=()
+          [ -n "$IN_NICHE" ] && ARGS+=(--niche "$IN_NICHE")
+          [ -n "$IN_STYLE" ] && ARGS+=(--style "$IN_STYLE")
+          python generate.py "${ARGS[@]}"
+
+      - name: Keep a copy of the video in the run (backup if Telegram fails)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tiktok-video
+          path: tiktok/output/*.mp4
+          retention-days: 14
+
+      - name: Save experiment log
+        run: |
+          git config user.name "tiktok-bot"
+          git config user.email "tiktok-bot@users.noreply.github.com"
+          git add data/history.json
+          git commit -m "Log daily TikTok video" || exit 0
+          git pull --rebase -q && git push
