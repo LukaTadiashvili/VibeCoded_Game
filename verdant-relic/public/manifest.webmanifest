@@ -1,0 +1,12 @@
+{
+  "name": "Verdant Relic: Elemental Frontier",
+  "short_name": "Verdant Relic",
+  "description": "A 3D third-person elemental jungle adventure.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#07120f",
+  "theme_color": "#0b1f1a",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
