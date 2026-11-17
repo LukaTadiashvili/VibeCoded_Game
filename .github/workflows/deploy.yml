@@ -1,11 +1,8 @@
-name: Deploy Verdant Relic to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'verdant-relic/**'
-      - '.github/workflows/deploy-verdant-relic.yml'
   workflow_dispatch:
 
 permissions:
@@ -20,21 +17,17 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: verdant-relic
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: verdant-relic/package-lock.json
       - run: npm ci
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: verdant-relic/dist
+          path: dist
 
   deploy:
     needs: build
