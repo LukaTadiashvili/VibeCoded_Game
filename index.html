@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Verdant Relic" />
+<meta name="theme-color" content="#0b1f1a" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" href="./icon.svg" />
+<link rel="icon" href="./icon.svg" type="image/svg+xml" />
+<title>Verdant Relic: Elemental Frontier</title>
+<style>
+  :root { --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); --el: #35d0ff; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #07120f; color: #eef6ee; font-family: -apple-system, "SF Pro Rounded", "Avenir Next", "Segoe UI", system-ui, sans-serif; overscroll-behavior: none; touch-action: none; }
+  #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #hud { position: fixed; inset: 0; pointer-events: none; }
+  .glass { background: linear-gradient(160deg, rgba(255,255,255,.20), rgba(255,255,255,.05)); border: 1px solid rgba(255,255,255,.34); -webkit-backdrop-filter: blur(9px) saturate(1.3); backdrop-filter: blur(9px) saturate(1.3); box-shadow: 0 6px 18px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35); }
+  /* ---- top status ---- */
+  #status { position: absolute; top: calc(var(--sat) + 8px); left: calc(var(--sal) + 10px); display: flex; gap: 8px; align-items: center; padding: 6px 10px 6px 6px; border-radius: 16px; }
+  #emblem { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--el) 30%, rgba(0,0,0,.45)); border: 1.5px solid var(--el); box-shadow: 0 0 14px var(--el); transition: all .25s; }
+  #emblem svg { width: 24px; height: 24px; }
+  .bars { display: grid; gap: 4px; }
+  .bar { width: 104px; height: 8px; border-radius: 5px; background: rgba(0,0,0,.45); overflow: hidden; border: 1px solid rgba(255,255,255,.2); }
+  .bar > i { display: block; height: 100%; width: 100%; border-radius: 5px; transition: width .08s linear; }
+  #chi > i { background: linear-gradient(90deg, var(--el), #fff); } #hp > i { background: linear-gradient(90deg, #ff5a5a, #ffb36b); }
+  #chi.flash { animation: flash .35s; } @keyframes flash { 50% { box-shadow: 0 0 0 3px #ff5a5a; } }
+  .lbl { font-size: 8px; letter-spacing: .14em; opacity: .75; text-transform: uppercase; line-height: 1; }
+  #right { position: absolute; top: calc(var(--sat) + 8px); right: calc(var(--sar) + 10px); padding: 7px 10px; border-radius: 16px; display: grid; gap: 4px; justify-items: end; }
+  #cores { display: flex; gap: 6px; } #cores b { width: 15px; height: 15px; transform: rotate(45deg); border: 1.5px solid rgba(255,255,255,.6); border-radius: 3px; background: rgba(0,0,0,.4); transition: all .4s; }
+  #cores b.on { background: #ffd97a; box-shadow: 0 0 12px #ffd97a; border-color: #fff; }
+  #compass { display: flex; align-items: center; gap: 6px; font-size: 11px; font-variant-numeric: tabular-nums; }
+  #arrow { width: 18px; height: 18px; transition: transform .1s linear; } #compass.pulse #arrow { filter: drop-shadow(0 0 6px #ffd97a); }
+  #eclipse { font-size: 9px; letter-spacing: .1em; opacity: .8; }
+  #objective { position: absolute; top: calc(var(--sat) + 66px); left: 50%; transform: translateX(-50%); width: min(92vw, 520px); text-align: center; font-size: 12px; line-height: 1.3; padding: 6px 12px; border-radius: 12px; background: rgba(6,18,14,.5); border: 1px solid rgba(255,217,122,.35); color: #ffeec2; }
+  #zone { position: absolute; top: calc(var(--sat) + 112px); left: 0; right: 0; text-align: center; font-size: 19px; letter-spacing: .22em; text-transform: uppercase; font-weight: 700; text-shadow: 0 2px 10px #000; opacity: 0; transition: opacity .6s; }
+  #toast { position: absolute; top: calc(var(--sat) + 144px); left: 50%; transform: translateX(-50%); max-width: 88vw; text-align: center; font-size: 13px; padding: 7px 14px; border-radius: 12px; background: rgba(0,0,0,.55); opacity: 0; transition: opacity .3s; }
+  #prompt { position: absolute; bottom: calc(var(--sab) + 262px); left: 50%; transform: translateX(-50%); font-size: 12px; padding: 6px 12px; border-radius: 999px; background: rgba(255,217,122,.92); color: #2a1c05; font-weight: 700; opacity: 0; transition: opacity .2s; white-space: nowrap; }
+  #reticle { position: absolute; left: 50%; top: 43%; width: 14px; height: 14px; margin: -7px; border: 1.5px solid rgba(255,255,255,.75); border-radius: 50%; box-shadow: 0 0 6px var(--el); }
+  #hurt { position: absolute; inset: 0; box-shadow: inset 0 0 90px 30px rgba(255,40,40,.0); transition: box-shadow .3s; } #hurt.on { box-shadow: inset 0 0 90px 30px rgba(255,40,40,.55); transition: none; }
+  /* ---- handheld console clusters ---- */
+  .cluster { position: absolute; width: 172px; height: 172px; bottom: calc(var(--sab) + 26px); pointer-events: none; }
+  #left { left: calc(var(--sal) + 10px); } #rightc { right: calc(var(--sar) + 10px); }
+  .btn { position: absolute; pointer-events: auto; display: grid; place-items: center; border-radius: 50%; color: #fff; font-weight: 800; touch-action: none; transition: transform .07s ease-out, filter .1s; }
+  .btn.pressed { transform: scale(.86) translateY(2px); filter: brightness(1.5); }
+  .btn small { position: absolute; bottom: -1px; font-size: 7px; letter-spacing: .08em; opacity: .9; font-weight: 700; text-shadow: 0 1px 2px #000; }
+  .face { width: 56px; height: 56px; font-size: 19px; }
+  .face::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; background: conic-gradient(rgba(255,255,255,.85) calc(var(--cd, 0) * 1turn), transparent 0); -webkit-mask: radial-gradient(circle, transparent 27px, #000 28px); mask: radial-gradient(circle, transparent 27px, #000 28px); pointer-events: none; }
+  #bA { left: 58px; top: 116px; --c: #4be08a; } #bB { left: 116px; top: 58px; --c: #ff6b6b; } #bX { left: 0; top: 58px; --c: var(--el); } #bY { left: 58px; top: 0; --c: #ffd24b; }
+  .face { border: 1.5px solid var(--c); box-shadow: 0 6px 16px rgba(0,0,0,.4), inset 0 0 14px color-mix(in srgb, var(--c) 55%, transparent); text-shadow: 0 0 8px var(--c); }
+  .shoulder { width: 84px; height: 36px; border-radius: 14px 14px 10px 10px; font-size: 12px; letter-spacing: .06em; bottom: calc(var(--sab) + 206px); }
+  .shoulder small { position: static; display: block; font-size: 7px; }
+  .shoulder > span { display: grid; justify-items: center; line-height: 1.05; }
+  #bL1 { left: calc(var(--sal) + 10px); border-color: #ffd97a; } #bR1 { right: calc(var(--sar) + 10px); border-color: #dff4ff; }
+  #bR1.active { background: rgba(223,244,255,.45); box-shadow: 0 0 18px #dff4ff; }
+  #stick { position: absolute; left: 40px; top: 40px; width: 92px; height: 92px; border-radius: 50%; pointer-events: auto; touch-action: none; }
+  #knob { position: absolute; left: 23px; top: 23px; width: 46px; height: 46px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #9fb 40%, #284 100%); box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 12px var(--el); pointer-events: none; }
+  .dpad { width: 38px; height: 38px; border-radius: 12px; }
+  .dpad svg { width: 20px; height: 20px; } .dpad.sel { box-shadow: 0 0 14px var(--c), inset 0 0 12px var(--c); border-color: var(--c); }
+  #dU { left: 67px; top: 0; --c: #ff5a1f; } #dD { left: 67px; top: 134px; --c: #35d0ff; } #dL { left: 0; top: 67px; --c: #b9c23e; } #dR { left: 134px; top: 67px; --c: #e6f6ff; }
+  /* ---- title + victory ---- */
+  .screen { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; padding: calc(var(--sat) + 20px) 22px calc(var(--sab) + 20px); background: radial-gradient(ellipse at 50% 30%, rgba(20,70,52,.55), rgba(3,10,8,.93)); z-index: 5; transition: opacity .6s; }
+  .screen.hide { opacity: 0; pointer-events: none; }
+  .screen h1 { margin: 0; font-size: clamp(34px, 11vw, 64px); letter-spacing: .08em; line-height: .95; font-weight: 900; background: linear-gradient(180deg, #fff3c4, #ffd97a 45%, #6fe0a0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .screen h2 { margin: 6px 0 0; font-size: 13px; letter-spacing: .42em; color: #9fe8c8; font-weight: 600; }
+  .screen p { font-size: 13px; line-height: 1.5; opacity: .85; max-width: 430px; margin: 14px auto; }
+  .cta { pointer-events: auto; margin-top: 10px; padding: 15px 34px; border-radius: 999px; font-size: 16px; font-weight: 800; letter-spacing: .16em; color: #1d1403; background: linear-gradient(180deg, #ffe9a0, #f0b23c); border: 0; box-shadow: 0 0 30px rgba(255,217,122,.5); animation: breathe 1.8s infinite; font-family: inherit; }
+  @keyframes breathe { 50% { transform: scale(1.05); box-shadow: 0 0 44px rgba(255,217,122,.8); } }
+  .legend { display: grid; grid-template-columns: auto auto; gap: 4px 14px; font-size: 11px; text-align: left; justify-content: center; opacity: .85; }
+  .legend b { color: #ffd97a; }
+  #stats { font-size: 13px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud"></div>
+<div id="title" class="screen">
+  <div>
+    <h2>ELEMENTAL FRONTIER</h2>
+    <h1>VERDANT<br/>RELIC</h1>
+    <p>Cole Vance, the elemental cowboy, must recover the three Solar Cores and awaken the Sun-Spire before the Eclipse Storm.</p>
+    <div class="legend">
+      <span><b>STICK</b> move / steer flight</span><span><b>D-PAD</b> Fire · Water · Earth · Air</span>
+      <span><b>A</b> jump / ascend</span><span><b>B</b> dodge roll / descend</span>
+      <span><b>X</b> bending attack</span><span><b>Y</b> heavy elemental talent</span>
+      <span><b>R1</b> flight mode</span><span><b>L1</b> Wayfinder pulse / interact</span>
+    </div>
+    <p style="font-size:11px;opacity:.6">Desktop: WASD · Space · C · F · 1-4 · J/K or mouse · E · Shift</p>
+    <button id="start" class="cta">TAP TO BEGIN</button>
+  </div>
+</div>
+<div id="victory" class="screen hide">
+  <div>
+    <h2>THE SUN-SPIRE AWAKENS</h2>
+    <h1>QUEST<br/>COMPLETE</h1>
+    <p id="stats"></p>
+    <button id="again" class="cta">RIDE AGAIN</button>
+  </div>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
